@@ -15,8 +15,8 @@ class MPII(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
         self.transform = transform
         self.data_split = data_split
-        self.img_path = osp.join(cfg.data_dir, 'MPII', 'data')
-        self.annot_path = osp.join(cfg.data_dir, 'MPII', 'data', 'annotations')
+        self.img_path = osp.join(cfg.data_dir, 'MPII')
+        self.annot_path = osp.join(cfg.data_dir, 'MPII', 'annotations')
 
         # mpii skeleton
         self.joint_set = {

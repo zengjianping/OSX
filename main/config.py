@@ -7,6 +7,7 @@ class Config:
     # dataset setting
     dataset_list = ['Human36M', 'MSCOCO', 'MPII', 'AGORA', 'EHF', 'UBody']
     trainset_3d = ['Human36M']; trainset_2d = ['MSCOCO', 'MPII']; testset = 'EHF'
+    trainset_3d = []
 
     ## UBody setting
     train_sample_interval = 10

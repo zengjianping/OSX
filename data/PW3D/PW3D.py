@@ -15,11 +15,11 @@ class PW3D(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
         self.transform = transform
         self.data_split = data_split
-        self.data_path = osp.join(cfg.data_dir, 'PW3D', 'data')
+        self.data_path = osp.join(cfg.data_dir, 'PW3D')
         self.datalist = self.load_data()
 
     def load_data(self):
-        db = COCO(osp.join(self.data_path, '3DPW_' + self.data_split + '.json'))
+        db = COCO(osp.join(self.data_path, 'annotations', '3DPW_' + self.data_split + '.json'))
 
         datalist = []
         for aid in db.anns.keys():

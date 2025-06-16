@@ -18,14 +18,14 @@ class EHF(torch.utils.data.Dataset):
         self.transform = transform
         self.data_split = data_split
         # self.data_path = osp.join('..', 'data', 'EHF', 'data')
-        self.data_path = osp.join(cfg.data_dir, 'EHF', 'data')
+        self.data_path = osp.join(cfg.data_dir, 'EHF')
         self.datalist = self.load_data()
         self.cam_param = {'R': [-2.98747896, 0.01172457, -0.05704687]}
         self.cam_param['R'], _ = cv2.Rodrigues(np.array(self.cam_param['R']))
 
     def load_data(self):
         datalist = []
-        db = COCO(osp.join(self.data_path, 'EHF.json'))
+        db = COCO(osp.join(self.data_path, 'annotations', 'EHF.json'))
         for aid in db.anns.keys():
             ann = db.anns[aid]
             image_id = ann['image_id']
