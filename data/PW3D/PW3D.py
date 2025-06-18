@@ -13,6 +13,7 @@ from common.utils.transforms import rigid_align
 
 class PW3D(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'PW3D-{data_split}'
         self.transform = transform
         self.data_split = data_split
         self.data_path = osp.join(cfg.data_dir, 'PW3D')

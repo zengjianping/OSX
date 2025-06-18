@@ -503,6 +503,7 @@ class UBody_Part(torch.utils.data.Dataset):
 
 class UBody(Dataset):
     def __init__(self, transform, mode='test'):
+        self.name = f'UBody-{mode}'
         self.dbs = []
 
         self.aids = []

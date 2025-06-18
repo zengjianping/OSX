@@ -8,6 +8,7 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', type=str, dest='dataset_path')
+    parser.add_argument('--human_model', type=str, dest='human_model')
     args = parser.parse_args()
 
     if not args.dataset_path:
@@ -15,7 +16,7 @@ def parse_args():
     return args
 
 args = parse_args()
-root_path = osp.join(args.dataset_path, 'smpl_gt')
+root_path = osp.join(args.dataset_path, f'{args.human_model}_gt')
 folder_path_list = glob(osp.join(root_path, '*'))
 for folder_path in folder_path_list:
     pkl_path_list = glob(osp.join(folder_path, '*.pkl'))

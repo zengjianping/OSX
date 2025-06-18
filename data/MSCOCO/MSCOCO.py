@@ -12,6 +12,7 @@ from common.utils.preprocessing import load_img, process_bbox, augmentation, pro
 
 class MSCOCO(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'MSCOCO-{data_split}'
         self.transform = transform
         self.data_split = data_split
         if os.path.exists(osp.join(cfg.data_dir, 'MSCOCO', 'images')):

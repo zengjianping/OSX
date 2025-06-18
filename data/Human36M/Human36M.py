@@ -5,6 +5,7 @@ import torch
 import cv2
 import json
 import copy
+import glob
 from pycocotools.coco import COCO
 from config import cfg
 from common.utils.human_models import smpl_x
@@ -13,11 +14,47 @@ from common.utils.transforms import world2cam, cam2pixel, rigid_align
 
 class Human36M(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'Human36M-{data_split}'
         self.transform = transform
         self.data_split = data_split
         self.img_dir = osp.join(cfg.data_dir, 'Human36M', 'images')
         self.annot_path = osp.join(cfg.data_dir, 'Human36M', 'annotations')
-        self.action_name = ['Directions', 'Discussion', 'Eating', 'Greeting', 'Phoning', 'Posing', 'Purchases', 'Sitting', 'SittingDown', 'Smoking', 'Photo', 'Waiting', 'Walking', 'WalkDog', 'WalkTogether']
+        self.action_name1 = ['_ALL', 'Directions', 'Discussion', 'Eating', 'Greeting', 'Phoning', 'Posing', 'Purchases',
+                            'Sitting', 'SittingDown', 'Smoking', 'TakingPhoto', 'Waiting', 'Walking', 'WalkingDog', 'WalkTogether']
+        self.action_name2 = ['_ALL', 'Directions', 'Discussion', 'Eating', 'Greeting', 'Phoning', 'Posing', 'Purchases',
+                            'Sitting', 'SittingDown', 'Smoking', 'Photo', 'Waiting', 'Walking', 'WalkDog', 'WalkTogether']
+        self.camera_name = ['54138969', '55011271', '58860488', '60457274']
+
+        all_video_names = {}
+        for subject in [1, 5, 6, 7, 8, 9, 11]:
+            video_dir = osp.join(cfg.data_dir, 'Human36M', f'S{subject}', 'Videos')
+            action_names = self.action_name1 if subject in [1] else self.action_name2
+            subject_video_names = [None] * len((action_names))
+            for act_idx, action_name in enumerate(action_names):
+                if action_name in ['Sitting']:
+                    video_files1 = glob.glob(osp.join(video_dir, f'{action_name}.*.mp4'))
+                    video_files2 = glob.glob(osp.join(video_dir, f'{action_name} *.mp4'))
+                    video_files = video_files1 + video_files2
+                else:
+                    video_files = glob.glob(osp.join(video_dir, f'{action_name}*.mp4'))
+                video_names = [osp.basename(video_file) for video_file in video_files]
+                if subject in [6] and action_name in ['SittingDown']:
+                    video_names = sorted(video_names)
+                    video_names = [osp.splitext(video_name)[0].replace(' ', '_') for video_name in video_names]
+                elif subject in [8] and action_name in ['Photo']:
+                    video_names = sorted(video_names)
+                    video_names = [osp.splitext(video_name)[0].replace(' ', '_') for video_name in video_names]
+                elif subject not in [1] and action_name in ['Photo', 'SittingDown']:
+                    video_names = [osp.splitext(video_name)[0].replace(' ', '_') for video_name in video_names]
+                    video_names = sorted(video_names)
+                else:
+                    video_names = sorted(video_names)
+                    video_names = [osp.splitext(video_name)[0].replace(' ', '_') for video_name in video_names]
+                assert len(video_names) > 0 and len(video_names) % 4 == 0, 'Error!!!'
+                subject_video_names[act_idx] = video_names
+            all_video_names[str(subject)] = subject_video_names
+        self.all_video_names = all_video_names
+
         # H36M joint set
         self.joint_set = {'joint_num': 17,
                         'joints_name': ('Pelvis', 'R_Hip', 'R_Knee', 'R_Ankle', 'L_Hip', 'L_Knee', 'L_Ankle', 'Torso', 'Neck', 'Head', 'Head_top', 'L_Shoulder', 'L_Elbow', 'L_Wrist', 'R_Shoulder', 'R_Elbow', 'R_Wrist'),
@@ -84,7 +121,6 @@ class Human36M(torch.utils.data.Dataset):
             ann = db.anns[aid]
             image_id = ann['image_id']
             img = db.loadImgs(image_id)[0]
-            img_path = osp.join(self.img_dir, img['file_name'])
             img_shape = (img['height'], img['width'])
             
             # check subject and frame_idx
@@ -113,7 +149,28 @@ class Human36M(torch.utils.data.Dataset):
         
             bbox = process_bbox(np.array(ann['bbox']), img['width'], img['height'])
             if bbox is None: continue
-            
+
+            #img_path = osp.join(self.img_dir, img['file_name'])
+            #img_name = 'S{}_{}{}.{}_{:06d}.jpg'.format(subject, self.action_name[action_idx-1],
+            #    f'_{subaction_idx-1}' if subaction_idx > 1 else '', self.camera_name[cam_idx-1], frame_idx+1)
+            img_name = self.all_video_names[str(subject)][action_idx-1][(subaction_idx-1)*4+cam_idx-1]
+            img_name = f'S{subject}_{img_name}_{frame_idx+1:06d}.jpg'
+            img_path = osp.join(self.img_dir, img_name)
+
+            if not osp.exists(img_path):
+                print(img_name)
+                continue
+
+            if False and subject == 6 and 'Photo' in img_name:
+                if frame_idx == 0:
+                    print(img['file_name'])
+                    print(img_name)
+                image = cv2.imread(img_path)
+                for x, y in joint_img:
+                    cv2.circle(image, [int(x),int(y)], 3, (0,0,255), -1)
+                cv2.imshow('image', image)
+                cv2.waitKey(10)
+
             datalist.append({
                 'img_path': img_path,
                 'img_shape': img_shape,

@@ -13,6 +13,7 @@ from common.utils.transforms import world2cam, cam2pixel
 
 class MPI_INF_3DHP(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'MPI_INF_3DHP-{data_split}'
         self.transform = transform
         self.data_split = data_split
         self.data_path = osp.join(cfg.data_dir, 'MPI_INF_3DHP', 'data')

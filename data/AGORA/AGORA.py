@@ -16,10 +16,11 @@ from common.utils.transforms import rigid_align
 
 class AGORA(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'AGORA-{data_split}'
         self.transform = transform
         self.data_split = data_split
-        self.data_path = osp.join(cfg.data_dir, 'AGORA', 'data')
-        self.resolution = (2160, 3840)  # height, width. one of (720, 1280) and (2160, 3840)
+        self.data_path = osp.join(cfg.data_dir, 'AGORA')
+        self.resolution = (720, 1280)  # height, width. one of (720, 1280) and (2160, 3840)
         self.test_set = 'test' if cfg.agora_benchmark else 'val'  # val, test
 
         # AGORA joint set

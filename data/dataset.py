@@ -10,6 +10,9 @@ class MultipleDatasets(Dataset):
         self.max_db_data_num = max([len(db) for db in dbs])
         self.db_len_cumsum = np.cumsum([len(db) for db in dbs])
         self.make_same_len = make_same_len
+        self.dataset_info = dict([(db.name,len(db)) for db in dbs])
+        self.name = '+'.join(self.dataset_info.keys())
+        print(f'Dataset - {self.name}: {self.__len__()}, {self.dataset_info}')
 
     def __len__(self):
         # all dbs have the same length

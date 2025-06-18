@@ -10,6 +10,7 @@ import smplx
 import os
 import pathlib
 import argparse
+import pandas as pd
 
 def get_bbox(joint_img, joint_valid):
     x_img, y_img = joint_img[:,0], joint_img[:,1]
@@ -96,16 +97,18 @@ pathlib.Path(osp.join(root_path, gt_verts_path, 'smpl')).mkdir(parents=True, exi
 for split in ('train', 'validation'):
     images = []
     annotations = []
-    data_path_list = glob(osp.join(root_path, split + '_SMPLX', 'SMPLX', '*.pkl')) + glob(osp.join(root_path, split + '_SMPL', 'SMPL', '*.pkl'))
+    data_path_list = glob(osp.join(root_path, split + '_SMPLX', 'SMPLX', '*.pkl')) #+ glob(osp.join(root_path, split + '_SMPL', 'SMPL', '*.pkl'))
     data_path_list = sorted(data_path_list)
 
     for data_path in tqdm(data_path_list):
         with open(data_path, 'rb') as f:
-            data_smplx = pickle.load(f, encoding='latin1')
+            #data_smplx = pickle.load(f, encoding='latin1')
+            data_smplx = pd.read_pickle(f)
             data_smplx = {k: list(v) for k,v in data_smplx.items()}
 
         with open(osp.join(root_path, split + '_SMPL', 'SMPL', data_path.split('/')[-1]), 'rb') as f:
-            data_smpl = pickle.load(f, encoding='latin1')
+            #data_smpl = pickle.load(f, encoding='latin1')
+            data_smpl = pd.read_pickle(f)
             data_smpl = {k: list(v) for k,v in data_smpl.items()}
        
         if split == 'train':

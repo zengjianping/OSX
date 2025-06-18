@@ -15,6 +15,7 @@ from common.utils.transforms import rigid_align
 
 class EHF(torch.utils.data.Dataset):
     def __init__(self, transform, data_split):
+        self.name = f'EHF-{data_split}'
         self.transform = transform
         self.data_split = data_split
         # self.data_path = osp.join('..', 'data', 'EHF', 'data')
