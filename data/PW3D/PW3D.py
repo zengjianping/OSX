@@ -35,7 +35,8 @@ class PW3D(torch.utils.data.Dataset):
             smpl_param = ann['smpl_param']
             bbox = process_bbox(np.array(ann['bbox']), img['width'], img['height'])
             if bbox is None: continue
-            data_dict = {'img_path': img_path, 'ann_id': aid, 'img_shape': (img['height'], img['width']), 'bbox': bbox, 'smpl_param': smpl_param, 'cam_param': cam_param}
+            data_dict = {'img_path': img_path, 'ann_id': aid, 'img_shape': (img['height'], img['width']),
+                'bbox': bbox, 'smpl_param': smpl_param, 'cam_param': cam_param}
             datalist.append(data_dict)
 
         return datalist

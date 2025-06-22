@@ -72,6 +72,8 @@ class MPI_INF_3DHP(torch.utils.data.Dataset):
             # smplx parameter
             smplx_param = smplx_params[str(subject_idx)][str(seq_idx)][str(frame_idx)]
     
+            if len(datalist) % cfg.sample_interval != 0:
+                continue
             datalist.append({
                 'img_path': img_path,
                 'img_id': image_id,

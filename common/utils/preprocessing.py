@@ -282,8 +282,8 @@ def process_human_model_output(human_model_param, cam_param, do_flip, img_shape,
         # apply camera exrinsic (translation)
         # compenstate rotation (translation from origin to root joint was not cancled)
         if 'R' in cam_param and 't' in cam_param:
-            R, t = np.array(cam_param['R'], dtype=np.float32).reshape(3, 3), np.array(cam_param['t'],
-                                                                                      dtype=np.float32).reshape(1, 3)
+            R, t = np.array(cam_param['R'], dtype=np.float32).reshape(3, 3), \
+                np.array(cam_param['t'], dtype=np.float32).reshape(1, 3)
             root_cam = joint_cam[smpl_x.root_joint_idx, None, :]
             joint_cam = joint_cam - root_cam + np.dot(R, root_cam.transpose(1, 0)).transpose(1, 0) + t
             mesh_cam = mesh_cam - root_cam + np.dot(R, root_cam.transpose(1, 0)).transpose(1, 0) + t

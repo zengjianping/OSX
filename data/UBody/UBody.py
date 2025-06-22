@@ -163,6 +163,8 @@ class UBody_Part(torch.utils.data.Dataset):
                 data_dict = {'img_path': img_path, 'img_shape': (img['height'], img['width']), 'bbox': bbox,
                              'joint_img': joint_img, 'joint_valid': joint_valid, 'smplx_param': smplx_param,
                              'lhand_bbox': lhand_bbox, 'rhand_bbox': rhand_bbox, 'face_bbox': face_bbox}
+                if len(datalist) % cfg.sample_interval != 0:
+                    continue
                 datalist.append(data_dict)
 
             return datalist

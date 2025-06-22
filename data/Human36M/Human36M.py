@@ -129,12 +129,17 @@ class Human36M(torch.utils.data.Dataset):
                 continue
 
             # smplx parameter
-            subject = img['subject']; action_idx = img['action_idx']; subaction_idx = img['subaction_idx']; frame_idx = img['frame_idx']; cam_idx = img['cam_idx'];
+            subject = img['subject']
+            action_idx = img['action_idx']
+            subaction_idx = img['subaction_idx']
+            frame_idx = img['frame_idx']
+            cam_idx = img['cam_idx']
             smplx_param = smplx_params[str(subject)][str(action_idx)][str(subaction_idx)][str(frame_idx)]
 
             # camera parameter
             cam_param = cameras[str(subject)][str(cam_idx)]
-            R,t,f,c = np.array(cam_param['R'], dtype=np.float32), np.array(cam_param['t'], dtype=np.float32), np.array(cam_param['f'], dtype=np.float32), np.array(cam_param['c'], dtype=np.float32)
+            R,t,f,c = np.array(cam_param['R'], dtype=np.float32), np.array(cam_param['t'], dtype=np.float32), \
+                np.array(cam_param['f'], dtype=np.float32), np.array(cam_param['c'], dtype=np.float32)
             cam_param = {'R': R, 't': t, 'focal': f, 'princpt': c}
             
             # only use frontal camera following previous works (HMR and SPIN)
@@ -171,6 +176,8 @@ class Human36M(torch.utils.data.Dataset):
                 cv2.imshow('image', image)
                 cv2.waitKey(10)
 
+            if len(datalist) % cfg.sample_interval != 0:
+                continue
             datalist.append({
                 'img_path': img_path,
                 'img_shape': img_shape,
@@ -202,12 +209,16 @@ class Human36M(torch.utils.data.Dataset):
             joint_img = data['joint_img']
             joint_img = np.concatenate((joint_img[:,:2], joint_cam[:,2:]),1) # x, y, depth
             joint_img[:,2] = (joint_img[:,2] / (cfg.body_3d_size / 2) + 1)/2. * cfg.output_hm_shape[0] # discretize depth
-            joint_img, joint_cam, joint_valid, joint_trunc = process_db_coord(joint_img, joint_cam, data['joint_valid'], do_flip, img_shape, self.joint_set['flip_pairs'], img2bb_trans, rot, self.joint_set['joints_name'], smpl_x.joints_name)
+            joint_img, joint_cam, joint_valid, joint_trunc = process_db_coord(joint_img, joint_cam,
+                data['joint_valid'], do_flip, img_shape, self.joint_set['flip_pairs'], img2bb_trans,
+                rot, self.joint_set['joints_name'], smpl_x.joints_name)
             
             # smplx coordinates and parameters
             smplx_param = data['smplx_param']
             cam_param['t'] /= 1000 # milimeter to meter
-            smplx_joint_img, smplx_joint_cam, smplx_joint_trunc, smplx_pose, smplx_shape, smplx_expr, smplx_pose_valid, smplx_joint_valid, smplx_expr_valid, smplx_mesh_cam_orig = process_human_model_output(smplx_param, cam_param, do_flip, img_shape, img2bb_trans, rot, 'smplx')
+            smplx_joint_img, smplx_joint_cam, smplx_joint_trunc, smplx_pose, smplx_shape, smplx_expr, \
+                smplx_pose_valid, smplx_joint_valid, smplx_expr_valid, smplx_mesh_cam_orig = \
+                process_human_model_output(smplx_param, cam_param, do_flip, img_shape, img2bb_trans, rot, 'smplx')
 
             """
             # for debug
@@ -235,8 +246,16 @@ class Human36M(torch.utils.data.Dataset):
             dummy_size = np.zeros((2), dtype=np.float32)
 
             inputs = {'img': img}
-            targets = {'joint_img': joint_img, 'smplx_joint_img': smplx_joint_img, 'joint_cam': joint_cam, 'smplx_joint_cam': smplx_joint_cam, 'smplx_pose': smplx_pose, 'smplx_shape': smplx_shape, 'smplx_expr': smplx_expr, 'lhand_bbox_center': dummy_center, 'lhand_bbox_size': dummy_size, 'rhand_bbox_center': dummy_center, 'rhand_bbox_size': dummy_size, 'face_bbox_center': dummy_center, 'face_bbox_size': dummy_size}
-            meta_info = {'joint_valid': joint_valid, 'joint_trunc': joint_trunc, 'smplx_joint_valid': smplx_joint_valid, 'smplx_joint_trunc': smplx_joint_trunc, 'smplx_pose_valid': smplx_pose_valid, 'smplx_shape_valid': float(smplx_shape_valid), 'smplx_expr_valid': float(smplx_expr_valid), 'is_3D': float(True), 'lhand_bbox_valid': float(False), 'rhand_bbox_valid': float(False), 'face_bbox_valid': float(False)}
+            targets = {'joint_img': joint_img, 'smplx_joint_img': smplx_joint_img, 'joint_cam': joint_cam,
+                'smplx_joint_cam': smplx_joint_cam, 'smplx_pose': smplx_pose, 'smplx_shape': smplx_shape,
+                'smplx_expr': smplx_expr, 'lhand_bbox_center': dummy_center, 'lhand_bbox_size': dummy_size,
+                'rhand_bbox_center': dummy_center, 'rhand_bbox_size': dummy_size, 'face_bbox_center': dummy_center,
+                'face_bbox_size': dummy_size}
+            meta_info = {'joint_valid': joint_valid, 'joint_trunc': joint_trunc, 'smplx_joint_valid':
+                smplx_joint_valid, 'smplx_joint_trunc': smplx_joint_trunc, 'smplx_pose_valid': smplx_pose_valid,
+                'smplx_shape_valid': float(smplx_shape_valid), 'smplx_expr_valid': float(smplx_expr_valid),
+                'is_3D': float(True), 'lhand_bbox_valid': float(False), 'rhand_bbox_valid': float(False),
+                'face_bbox_valid': float(False)}
             return inputs, targets, meta_info
         else:
             inputs = {'img': img}

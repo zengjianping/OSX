@@ -54,6 +54,8 @@ class MPII(torch.utils.data.Dataset):
             else:
                 smplx_param = None
 
+            if len(datalist) % cfg.sample_interval != 0:
+                continue
             datalist.append({
                 'img_path': img_path,
                 'img_shape': (img['height'], img['width']),
